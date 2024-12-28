@@ -1,32 +1,45 @@
+use super::errors::*;
 use std::{
     fs::File,
+    io::{BufReader, Read, Seek},
     path::{self, Path},
     process::ExitCode,
 };
 
-use super::errors::*;
-
+/// The expected XML file extension.
 const XML_EXT: &str = "xml";
+/// The expected property list file extension.
 const PLIST_EXT: &str = "plist";
 
+/// The `DOCTYPE` tag which is expected in `.plist` files.
+const DOCTYPE_TAG: &str = "DOCTYPE";
+
+/// Options for formatting error messages sent to the `stderr` stream on
+/// failure.
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]
-pub enum QuitFormat {
+pub enum FailureFmt {
+    // Only a provided error is printed.
     ErrorOnly,
+    // The provided error and a usage hint is printed.
     WithUsage,
+    // The provided error and an example is printed.
     WithExample,
+    // The provided error and both a usage hint and example is printed.
     WithUsageAndExample,
 }
 
-pub fn quit(error: &str, format_type: QuitFormat) -> ExitCode {
+/// Prints a formatted error message to the `stderr` stream and returns
+/// [`ExitCode::FAILURE`].
+pub fn failure(error: &str, format_type: FailureFmt) -> ExitCode {
     let mut s = error.to_string();
 
     match format_type {
-        QuitFormat::ErrorOnly => {}
-        QuitFormat::WithUsage => s = format!("{s}\n\n{USAGE}"),
-        QuitFormat::WithExample => s = format!("{s}\n\n{EXAMPLE}"),
-        QuitFormat::WithUsageAndExample => {
-            s = format!("{s}\n\n{USAGE}\n{EXAMPLE}");
+        FailureFmt::ErrorOnly => {}
+        FailureFmt::WithUsage => s = format!("{s}\n\n{USAGE}"),
+        FailureFmt::WithExample => s = format!("{s}\n\n{EXAMPLES}"),
+        FailureFmt::WithUsageAndExample => {
+            s = format!("{s}\n\n{USAGE}\n\n{EXAMPLES}");
         }
     }
 
@@ -35,32 +48,28 @@ pub fn quit(error: &str, format_type: QuitFormat) -> ExitCode {
     ExitCode::FAILURE
 }
 
-pub fn get_args() -> Result<(String, String), String> {
-    let mut args = std::env::args();
-    _ = args.next();
-    let first_arg = args.next();
+/// Attempts to find a line containing the [`DOCTYPE_TAG`] within the provided
+/// `File`, or returns `None` if not found.
+pub fn get_doctype_str(file: &File) -> Option<String> {
+    let mut s = String::new();
+    let mut reader = BufReader::new(file);
 
-    if first_arg.is_none() {
-        return Err(String::from(NO_ARGS));
+    if reader.read_to_string(&mut s).is_err() {
+        return None;
     }
 
-    let second_arg = args.next();
+    assert!(
+        reader.rewind().is_ok(),
+        "Fatal: failed to rewind reader while finding DOCTYPE tag"
+    );
 
-    if second_arg.is_none() {
-        return Err(String::from(ONE_ARG));
-    }
-
-    Ok((first_arg.unwrap(), second_arg.unwrap()))
+    s.lines()
+        .find(|&x| x.contains(DOCTYPE_TAG))
+        .map(String::from)
 }
 
-pub fn into_plist(path: &Path) -> Result<File, String> {
-    into_file(path, PLIST_EXT, NOT_PLIST)
-}
-
-pub fn into_xml(path: &Path) -> Result<File, String> {
-    into_file(path, XML_EXT, NOT_XML)
-}
-
+/// Attempts to format a `Path` into an absolute path as a `String`. If this
+/// can't be achieved, `"[unknown path]"` is returned.
 pub fn absolutize(path: &Path) -> String {
     if !path.exists() {
         return String::from(path.to_str().unwrap_or("[unknown path]"));
@@ -75,17 +84,30 @@ pub fn absolutize(path: &Path) -> String {
     String::from(abs.unwrap().as_path().to_str().unwrap_or("[unknown_path]"))
 }
 
+/// Tries to convert the provided `Path` into a `File` which is guaranteed to be
+/// a `.plist` file, or returns an error message if unsuccessful.
+pub fn into_plist(path: &Path) -> Result<File, String> {
+    into_file(path, PLIST_EXT, ERR_NOT_PLIST_FILE)
+}
+
+/// Tries to convert the provided `Path` into a `File` which is guaranteed to be
+/// a `.xml` file, or returns an error message if unsuccessful.
+pub fn into_xml(path: &Path) -> Result<File, String> {
+    into_file(path, XML_EXT, ERR_NOT_XML_FILE)
+}
+
+/// Inner implementation for [`into_plist()`] and [`into_xml()`].
 fn into_file(
     path: &Path,
     file_ext: &str,
     ext_err: &str,
 ) -> Result<File, String> {
     if !path.exists() {
-        return Err(format!("{FILE_MISSING} \"{}\"", absolutize(path)));
+        return Err(format!("{ERR_FILE_NOT_FOUND} \"{}\"", absolutize(path)));
     }
 
     if !path.is_file() {
-        return Err(format!("{NOT_A_FILE}: \"{}\"", absolutize(path)));
+        return Err(format!("{ERR_UNKNOWN_FILE}: \"{}\"", absolutize(path)));
     }
 
     let ext = path.extension();
