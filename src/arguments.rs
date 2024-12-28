@@ -4,9 +4,9 @@ use std::{fs::File, path::Path};
 /// A type for storing and acting upon command line arguments for the `plinject`
 /// command.
 pub struct Arguments {
-    pub plist: String,
-    pub xml: String,
-    pub output: Option<String>,
+    plist: String,
+    xml: String,
+    output: Option<String>,
 }
 
 impl Arguments {
