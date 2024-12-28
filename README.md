@@ -76,7 +76,7 @@ executable wherever is needed and it should run. However, it is nonetheless
 recommended to create a symlink, e.g.:
 
 ```bash
-ln -sf ./target/release/plinject /path/to/project/plinject
+ln -sF ./target/release/plinject /path/to/project/plinject
 ```
 
 ## Example: associate file type with application
