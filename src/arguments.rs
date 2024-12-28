@@ -1,6 +1,8 @@
 use super::{errors::*, helpers::*};
 use std::{fs::File, path::Path};
 
+const PLINJECT_EXECUTABLE_NAME: &str = "plinject";
+
 /// A type for storing and acting upon command line arguments for the `plinject`
 /// command.
 pub struct Arguments {
@@ -14,7 +16,17 @@ impl Arguments {
     /// an error message if the arguments are invalid.
     pub fn from_args() -> Result<Self, String> {
         let mut args = std::env::args();
-        _ = args.next();
+
+        // the very first argument is usually the executable path, but this
+        // isn't guaranteed. here we panic if it isn't, as any remaining
+        // arguments may not follow an expected format.
+        if let Some(executable_path) = args.next() {
+            assert!(
+                executable_path.contains(PLINJECT_EXECUTABLE_NAME),
+                "{ERR_INVALID_EXECUTABLE_ARG}, but was \"{executable_path}\""
+            );
+        }
+
         let first_arg = args.next();
 
         if first_arg.is_none() {

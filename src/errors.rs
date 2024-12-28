@@ -13,6 +13,12 @@ pub const EXAMPLES: &str = "Examples:
 pub const DOCTYPE_INFO: &str =
     "Info: located `DOCTYPE` tag in source .plist; copying it to the output";
 
+/// Error message to show if the first argument does not contain the executable
+/// path.
+pub const ERR_INVALID_EXECUTABLE_ARG: &str =
+    "Error: invalid command line arguments
+Details: first argument was expected to be the executable path";
+
 /// Error message to show if no arguments are provided.
 pub const ERR_NO_ARGS: &str = "Error: received 0 arguments, expected at least 2
 Help: a destination and source path are required";
