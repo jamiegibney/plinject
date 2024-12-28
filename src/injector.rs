@@ -16,8 +16,7 @@ pub struct XMLInjector<W: Write> {
 }
 
 impl<W: Write> XMLInjector<W> {
-    /// Creates a new `XMLInjector` which will write to the
-    /// `output_destination`.
+    /// Creates a new `XMLInjector` which will write to `write_destination`.
     pub fn new(write_destination: W) -> Self {
         Self {
             writer: EmitterConfig::new()

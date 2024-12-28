@@ -14,32 +14,33 @@ mod errors;
 mod helpers;
 mod injector;
 
+// we return this Result to allow the ? operator to be used
 fn main() -> Result<ExitCode, ExitCode> {
-    // Get arguments from the command line
+    // get arguments from the command line
     let args =
         Arguments::from_args().map_err(|e| failure(&e, WithUsageAndExample))?;
 
-    // Try to open a File of the .plist file
+    // try to open Files from the plist/xml arguments
     let plist = args.get_plist_file().map_err(|e| failure(&e, ErrorOnly))?;
-
-    // Try to open a File of the .xml file
     let xml = args.get_xml_file().map_err(|e| failure(&e, ErrorOnly))?;
 
-    // Create an output buffer and injector
+    // create an output buffer and injector
+    // we could write directly to the output file, but using a buffer protects
+    // the output file in case an error occurs before injection has finished
     let output = BufWriter::new(Vec::new());
     let mut injector = XMLInjector::new(output);
 
-    // Read the source file into the output buffer, injecting the target
+    // read the source file into the output buffer, injecting the target
     // properties where appropriate
     injector
         .inject(&plist, &xml)
         .map_err(|e| failure(&e, ErrorOnly))?;
 
-    // Write the output file
+    // write to the output file
     args.write(injector.buffer())
         .map_err(|e| failure(&e, ErrorOnly))?;
 
-    // Success!
+    // success!
     args.print_success();
     Ok(ExitCode::SUCCESS)
 }
