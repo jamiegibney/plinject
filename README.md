@@ -1,16 +1,16 @@
 # `plinject`
 
-`plinject` is a tool designed to inject properties into an `Info.plist` file,
-which is a file found in many macOS applications which stores key properties
-about that application (such as its name, version, or icon).
+`plinject` is a tool designed to inject properties into an `Info.plist` file: a
+file found in many macOS applications which stores key properties about the
+application such as its name, version, or icon.
 
 An example usage for `plinject` would be to [inject properties to assocate a
 certain file type with an
 application](#example%3A-associate-file-type-with-application).
 
-Typically this process would be achieved using Xcode. This tool may be used to
-avoid using Xcode to set `.plist` files if, for example, CMake is used for a
-project.
+Typically settings .plist files is achieved with Xcode, but this tool provides
+an alternative option if you know which properties need to be set. This can be
+helpful for project that use build tools such as CMake or Cargo.
 
 `plinject` only depends on the [`xml-rs`](https://crates.io/crates/xml-rs)
 crate.
@@ -20,13 +20,17 @@ crate.
 Run `plinject` without arguments to see this message:
 
 ```
-Error: received 0 arguments, expected 2
+Error: received 0 arguments, expected at least 2
 Help: a destination and source path are required
 
 Usage:
-$ plinject [destination .plist file] [source .xml file to inject]
-Example:
-$ plinject App.app/Contents/Info.plist injection.xml
+  $ plinject [destination .plist file] [source .xml file to inject] [optional output .plist file]
+
+Note: the destination .plist file is overwritten if no output file is provided
+
+Examples:
+  $ plinject Example.app/Contents/Info.plist injection.xml
+  $ plinject source.plist injection.xml output.plist
 ```
 
 ## Building from source
@@ -112,3 +116,8 @@ or
 ```bash
 ./target/release/plinject Example.app/Contents/Info.plist file_type.xml
 ```
+
+## Other tools
+
+- [`xmlformat`](https://github.com/pamoller/xmlformatter) is a great tool to use
+if you want to clean up .plist or .xml files.
