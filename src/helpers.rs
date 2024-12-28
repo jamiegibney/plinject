@@ -1,6 +1,7 @@
 use std::{
     fs::File,
-    path::{self, Path}, process::ExitCode,
+    path::{self, Path},
+    process::ExitCode,
 };
 
 use super::errors::*;
