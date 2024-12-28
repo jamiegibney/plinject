@@ -5,13 +5,12 @@
     <integer>1</integer>
     <key>CFBundleTypeExtensions</key>
     <array>
-      <string>emearr</string>
-      <string>eme</string>
+      <string>extension_name</string>
     </array>
     <key>NSDocumentClass</key>
     <string>NSDocument</string>
     <key>CFBundleTypeName</key>
-    <string>EME Arrangement</string>
+    <string>File type name</string>
     <key>LSHandlerRank</key>
     <string>Owner</string>
   </dict>
