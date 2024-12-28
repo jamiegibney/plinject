@@ -40,7 +40,7 @@ $ plinject App.app/Contents/Info.plist injection.xml
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/Sound-Reactions/plinject && cd plinject
+git clone https://github.com/jamiegibney/plinject && cd plinject
 ```
 
 ### 2. Build with `cargo`
