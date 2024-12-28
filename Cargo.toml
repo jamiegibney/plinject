@@ -1,0 +1,12 @@
+[package]
+name = "plinject"
+version = "1.0"
+edition = "2021"
+authors = ["jamiegibney <jamiegibneyuk@gmail.com>"]
+rust-version = "1.83.0"
+description = "Tool for injecting XML into .plist files"
+readme = "./README.md"
+# repository = ""
+
+[dependencies]
+xml-rs = "0.8.24"
