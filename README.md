@@ -8,7 +8,7 @@ An example usage for `plinject` would be to [inject properties to assocate a
 certain file type with an
 application](#example%3A-associate-file-type-with-application).
 
-Typically settings .plist files is achieved with Xcode, but this tool provides
+Typically setting .plist files is achieved with Xcode, but this tool provides
 an alternative option if you know which properties need to be set. This can be
 helpful for project that use build tools such as CMake or Cargo.
 
