@@ -82,7 +82,7 @@ impl Arguments {
     }
 
     /// Returns the appropriate target path from the current arguments.
-    fn get_target_path(&self) -> &Path {
+    pub fn get_target_path(&self) -> &Path {
         self.target
             .as_ref()
             .map_or_else(|| Path::new(&self.plist), |s| Path::new(s))

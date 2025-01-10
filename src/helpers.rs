@@ -3,13 +3,18 @@ use std::{
     fs::File,
     io::{BufReader, Read, Seek},
     path::{self, Path},
-    process::ExitCode,
+    process::{Command, ExitCode},
 };
 
 /// The expected XML file extension.
 const XML_EXT: &str = "xml";
 /// The expected property list file extension.
 const PLIST_EXT: &str = "plist";
+
+/// The name of the `which` executable.
+const WHICH_EXECUTABLE_NAME: &str = "which";
+/// The name of the `xmlformat` executable.
+const XMLFORMAT_EXECUTABLE_NAME: &str = "xmlformat";
 
 /// The `DOCTYPE` tag which is expected in `.plist` files.
 const DOCTYPE_TAG: &str = "DOCTYPE";
@@ -106,6 +111,26 @@ pub fn into_plist(path: &Path) -> Result<File, String> {
 /// a `.xml` file, or returns an error message if unsuccessful.
 pub fn into_xml(path: &Path) -> Result<File, String> {
     into_file(path, XML_EXT, ERR_NOT_XML_FILE)
+}
+
+/// Attempts to format a `.xml` or `.plist` file at `target_path` using the
+/// `xmlformat` tool. Returns `true` if `xmlformat` is found and exits
+/// successfully.
+pub fn try_format(target_path: &Path) -> bool {
+    if !Command::new(WHICH_EXECUTABLE_NAME)
+        .arg(XMLFORMAT_EXECUTABLE_NAME)
+        .output()
+        .is_ok_and(|e| e.status.success())
+    {
+        return false;
+    }
+
+    let abs_path = fmt_abs_path(target_path);
+
+    Command::new(XMLFORMAT_EXECUTABLE_NAME)
+        .arg(abs_path)
+        .output()
+        .is_ok_and(|e| e.status.success())
 }
 
 /// Inner implementation for [`into_plist()`] and [`into_xml()`].

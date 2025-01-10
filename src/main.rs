@@ -3,7 +3,7 @@
 
 use arguments::Arguments;
 use helpers::{
-    failure,
+    failure, fmt_rel_path, try_format,
     FailureFmt::{ErrorOnly, WithUsageAndExample},
 };
 use injector::XMLInjector;
@@ -39,6 +39,16 @@ fn main() -> Result<ExitCode, ExitCode> {
     // write to the target file
     args.write_to_target(injector.buffer())
         .map_err(|e| failure(&e, ErrorOnly))?;
+
+    let output_path = args.get_target_path();
+
+    // attempt to format with xmlformat, if found
+    if try_format(output_path) {
+        println!(
+            "Info: target file at \"{}\" was formatted with xmlformat",
+            fmt_rel_path(output_path)
+        );
+    }
 
     // success!
     args.print_success();
