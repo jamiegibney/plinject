@@ -76,8 +76,8 @@ impl Arguments {
     pub fn print_success(&self) {
         println!(
             "Done: injected contents of \"{}\" into \"{}\"",
-            absolutize(Path::new(&self.xml)),
-            absolutize(self.get_target_path())
+            fmt_rel_path(Path::new(&self.xml)),
+            fmt_rel_path(self.get_target_path())
         );
     }
 

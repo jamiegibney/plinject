@@ -14,6 +14,8 @@ const PLIST_EXT: &str = "plist";
 /// The `DOCTYPE` tag which is expected in `.plist` files.
 const DOCTYPE_TAG: &str = "DOCTYPE";
 
+const UNKNOWN_PATH_STR: &str = "[unknown path]";
+
 /// Options for formatting error messages sent to the `stderr` stream on
 /// failure.
 #[allow(dead_code)]
@@ -70,18 +72,28 @@ pub fn get_doctype_str(file: &File) -> Option<String> {
 
 /// Attempts to format a `Path` into an absolute path as a `String`. If this
 /// can't be achieved, `"[unknown path]"` is returned.
-pub fn absolutize(path: &Path) -> String {
-    if !path.exists() {
-        return String::from(path.to_str().unwrap_or("[unknown path]"));
+pub fn fmt_abs_path(path: &Path) -> String {
+    if !path.try_exists().is_ok_and(|e| e) {
+        return String::from(path.to_str().unwrap_or(UNKNOWN_PATH_STR));
     }
 
     let abs = path::absolute(path);
 
     if abs.is_err() {
-        return String::from("[unknown path]");
+        return String::from(UNKNOWN_PATH_STR);
     }
 
-    String::from(abs.unwrap().as_path().to_str().unwrap_or("[unknown_path]"))
+    String::from(abs.unwrap().as_path().to_str().unwrap_or(UNKNOWN_PATH_STR))
+}
+
+/// Attempts to format a `Path` into a relative path as a `String`. If this
+/// can't be achieved, `"[unknown path]"` is returned.
+pub fn fmt_rel_path(path: &Path) -> String {
+    if !path.try_exists().is_ok_and(|e| e) {
+        return UNKNOWN_PATH_STR.to_string();
+    }
+
+    path.to_str().unwrap_or(UNKNOWN_PATH_STR).to_string()
 }
 
 /// Tries to convert the provided `Path` into a `File` which is guaranteed to be
@@ -102,12 +114,12 @@ fn into_file(
     file_ext: &str,
     ext_err: &str,
 ) -> Result<File, String> {
-    if !path.exists() {
-        return Err(format!("{ERR_FILE_NOT_FOUND} \"{}\"", absolutize(path)));
+    if !path.try_exists().is_ok_and(|e| e) {
+        return Err(format!("{ERR_FILE_NOT_FOUND} \"{}\"", fmt_abs_path(path)));
     }
 
     if !path.is_file() {
-        return Err(format!("{ERR_UNKNOWN_FILE}: \"{}\"", absolutize(path)));
+        return Err(format!("{ERR_UNKNOWN_FILE}: \"{}\"", fmt_abs_path(path)));
     }
 
     let ext = path.extension();
