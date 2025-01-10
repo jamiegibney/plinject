@@ -18,7 +18,7 @@ mod injector;
 fn main() -> Result<ExitCode, ExitCode> {
     // get arguments from the command line
     let args =
-        Arguments::from_args().map_err(|e| failure(&e, WithUsageAndExample))?;
+        Arguments::from_env().map_err(|e| failure(&e, WithUsageAndExample))?;
 
     // try to open Files from the plist/xml arguments
     let plist = args.get_plist_file().map_err(|e| failure(&e, ErrorOnly))?;
@@ -36,8 +36,8 @@ fn main() -> Result<ExitCode, ExitCode> {
         .inject(&plist, &xml)
         .map_err(|e| failure(&e, ErrorOnly))?;
 
-    // write to the output file
-    args.write(injector.buffer())
+    // write to the target file
+    args.write_to_target(injector.buffer())
         .map_err(|e| failure(&e, ErrorOnly))?;
 
     // success!

@@ -116,7 +116,7 @@ fn into_file(
         return Err(String::from(ext_err));
     }
 
-    if ext.unwrap() != file_ext {
+    if unsafe { ext.unwrap_unchecked() } != file_ext {
         return Err(String::from(ext_err));
     }
 

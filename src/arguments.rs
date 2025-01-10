@@ -8,18 +8,19 @@ const PLINJECT_EXECUTABLE_NAME: &str = "plinject";
 pub struct Arguments {
     plist: String,
     xml: String,
-    output: Option<String>,
+    target: Option<String>,
 }
 
 impl Arguments {
     /// Tries to create a new `Arguments` from [`std::env::args()`], or returns
     /// an error message if the arguments are invalid.
-    pub fn from_args() -> Result<Self, String> {
+    pub fn from_env() -> Result<Self, String> {
         let mut args = std::env::args();
 
         // the very first argument is usually the executable path, but this
         // isn't guaranteed. here we panic if it isn't, as any remaining
         // arguments may not follow an expected format.
+        // TODO: this should be handled more gracefully
         if let Some(executable_path) = args.next() {
             assert!(
                 executable_path.contains(PLINJECT_EXECUTABLE_NAME),
@@ -39,17 +40,19 @@ impl Arguments {
             return Err(String::from(ERR_ONE_ARG));
         }
 
-        Ok(Self {
-            plist: first_arg.unwrap(),
-            xml: second_arg.unwrap(),
-            output: args.next(),
-        })
+        unsafe {
+            Ok(Self {
+                plist: first_arg.unwrap_unchecked(),
+                xml: second_arg.unwrap_unchecked(),
+                target: args.next(),
+            })
+        }
     }
 
-    /// Writes the data from the provide buffer to the appropriate output path,
+    /// Writes the data from the provide buffer to the appropriate target path,
     /// or returns an error message if the write operation failed.
-    pub fn write(&self, buffer: &[u8]) -> Result<(), String> {
-        std::fs::write(self.get_output_path(), buffer).map_err(|e| {
+    pub fn write_to_target(&self, buffer: &[u8]) -> Result<(), String> {
+        std::fs::write(self.get_target_path(), buffer).map_err(|e| {
             format!("Error: failed to write file\nDetails: \"{e:?}\"")
         })
     }
@@ -74,13 +77,13 @@ impl Arguments {
         println!(
             "Done: injected contents of \"{}\" into \"{}\"",
             absolutize(Path::new(&self.xml)),
-            absolutize(self.get_output_path())
+            absolutize(self.get_target_path())
         );
     }
 
-    /// Returns the appropriate output path from the current arguments.
-    fn get_output_path(&self) -> &Path {
-        self.output
+    /// Returns the appropriate target path from the current arguments.
+    fn get_target_path(&self) -> &Path {
+        self.target
             .as_ref()
             .map_or_else(|| Path::new(&self.plist), |s| Path::new(s))
     }

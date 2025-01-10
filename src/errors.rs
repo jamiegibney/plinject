@@ -1,17 +1,17 @@
 /// A hint suggesting how to use the command.
 pub const USAGE: &str = "Usage:
-  $ plinject [destination .plist file] [source .xml file to inject] [optional output .plist file]
+  $ plinject [destination .plist file] [source .xml file to inject] [optional target .plist file]
 
-Note: the destination .plist file is overwritten if no output file is provided";
+Note: the destination .plist file is overwritten if no target file is provided";
 
 /// Two example usages of the command.
 pub const EXAMPLES: &str = "Examples:
   $ plinject Example.app/Contents/Info.plist injection.xml
-  $ plinject source.plist injection.xml output.plist";
+  $ plinject source.plist injection.xml target.plist";
 
 /// Info message if a `DOCTYPE` tag is located.
 pub const DOCTYPE_INFO: &str =
-    "Info: located `DOCTYPE` tag in source .plist; copying it to the output";
+    "Info: located `DOCTYPE` tag in source .plist; copying it to the target";
 
 /// Error message to show if the first argument does not contain the executable
 /// path.
