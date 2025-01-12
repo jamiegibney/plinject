@@ -128,7 +128,7 @@ pub fn try_format(target_path: &Path) -> bool {
     let abs_path = fmt_abs_path(target_path);
 
     Command::new(XMLFORMAT_EXECUTABLE_NAME)
-        .arg(abs_path)
+        .args(["--overwrite", &abs_path])
         .output()
         .is_ok_and(|e| e.status.success())
 }
